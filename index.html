@@ -1,304 +1,135 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>AI Sandbox - 5分でわかる図解</title>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>AI Sandboxとは</title>
 <style>
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN",
-                 "Yu Gothic", "Noto Sans JP", sans-serif;
-    background: #f6f8fb;
-    color: #172033;
-  }
-  .page {
-    width: min(1440px, 96vw);
-    margin: 24px auto;
-    background: white;
-    border-radius: 24px;
-    box-shadow: 0 12px 40px rgba(20,35,70,.10);
-    padding: 28px 32px 30px;
-  }
-  h1 {
-    margin: 0 0 6px;
-    font-size: 34px;
-    letter-spacing: -.02em;
-  }
-  .lead {
-    margin: 0 0 24px;
-    font-size: 18px;
-    color: #4a5873;
-  }
-  .hero {
-    display: grid;
-    grid-template-columns: 1fr 1.2fr 1fr;
-    gap: 18px;
-    align-items: stretch;
-    margin-bottom: 22px;
-  }
-  .panel, .core, .mini, .product {
-    border-radius: 18px;
-    padding: 18px;
-  }
-  .panel {
-    background: #fbfcfe;
-    border: 1px solid #e4e9f2;
-  }
-  .panel h2, .section-title {
-    margin: 0 0 12px;
-    font-size: 18px;
-  }
-  .danger {
-    background: #fff7f5;
-    border: 1px solid #f2d6cf;
-  }
-  .safe {
-    background: #f5fbf7;
-    border: 1px solid #cfe8d7;
-  }
-  .core {
-    background: #172033;
-    color: white;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    min-height: 250px;
-    position: relative;
-  }
-  .core .big {
-    font-size: 34px;
-    font-weight: 800;
-    margin-bottom: 10px;
-  }
-  .core .quote {
-    font-size: 18px;
-    line-height: 1.6;
-    color: #d9e1f0;
-  }
-  .core .tag {
-    display: inline-block;
-    margin-top: 14px;
-    padding: 8px 12px;
-    border-radius: 999px;
-    background: rgba(255,255,255,.10);
-    font-size: 14px;
-  }
-  .flow {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-top: 10px;
-  }
-  .step {
-    padding: 10px 12px;
-    border-radius: 12px;
-    background: white;
-    border: 1px solid #e4e9f2;
-    font-size: 14px;
-  }
-  .arrow {
-    text-align: center;
-    font-weight: 700;
-    color: #7a879e;
-  }
-  .axes {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 12px;
-    margin-bottom: 22px;
-  }
-  .mini {
-    background: #f8fafc;
-    border: 1px solid #e0e6ef;
-    min-height: 126px;
-  }
-  .mini b {
-    display: block;
-    font-size: 16px;
-    margin-bottom: 6px;
-  }
-  .mini span {
-    font-size: 13px;
-    color: #5b687d;
-    line-height: 1.5;
-  }
-  .tech {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 14px;
-    margin-bottom: 22px;
-  }
-  .tech .card {
-    border-radius: 16px;
-    padding: 16px 18px;
-    border: 1px solid #dfe5ee;
-    background: #ffffff;
-  }
-  .tech .name {
-    font-size: 18px;
-    font-weight: 800;
-    margin-bottom: 4px;
-  }
-  .tech .os {
-    font-size: 12px;
-    color: #7a8798;
-    margin-bottom: 10px;
-  }
-  .tech .essence {
-    font-size: 15px;
-    font-weight: 700;
-    margin-bottom: 6px;
-  }
-  .tech .desc {
-    font-size: 13px;
-    color: #5f6d82;
-    line-height: 1.5;
-  }
-  .products {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 14px;
-    margin-bottom: 20px;
-  }
-  .product {
-    background: #fbfcfe;
-    border: 1px solid #e3e8f0;
-  }
-  .product .title {
-    font-size: 17px;
-    font-weight: 800;
-    margin-bottom: 6px;
-  }
-  .product .one {
-    font-size: 14px;
-    line-height: 1.5;
-    color: #4e5d74;
-  }
-  .bottom {
-    padding: 16px 18px;
-    border-radius: 16px;
-    background: #eef4ff;
-    border: 1px solid #cfdcf7;
-    font-size: 18px;
-    font-weight: 700;
-    text-align: center;
-  }
-  .muted { color: #6c7890; font-size: 13px; }
-  ul { padding-left: 20px; margin: 8px 0 0; }
-  li { margin: 6px 0; line-height: 1.45; }
-  .code {
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    font-size: 12px;
-    background: rgba(23,32,51,.05);
-    padding: 2px 5px;
-    border-radius: 6px;
-  }
-  @media (max-width: 980px) {
-    .hero, .tech, .products { grid-template-columns: 1fr; }
-    .axes { grid-template-columns: repeat(2, 1fr); }
-  }
-  @media print {
-    body { background: white; }
-    .page { width: 100%; margin: 0; box-shadow: none; border-radius: 0; }
-  }
+
+*{box-sizing:border-box}
+:root{
+  --bg:#f4f7fb;--panel:#fff;--ink:#172033;--muted:#5d6a80;--line:#dde5ef;
+  --blue:#4263eb;--teal:#0f8b8d;--purple:#6f4ad8;--soft:#f8fafc;
+  --danger-bg:#fff5f2;--danger-line:#f0d8cf;--good-bg:#f3fbf5;--good-line:#cfe7d4;
+}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Kaku Gothic ProN","Yu Gothic","Noto Sans JP",sans-serif;
+}
+.page{
+  width:min(1480px,96vw);margin:24px auto;background:var(--panel);border-radius:24px;
+  box-shadow:0 12px 42px rgba(20,35,70,.10);padding:28px 32px 30px;
+}
+.header{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:22px}
+.eyebrow{font-size:12px;font-weight:800;letter-spacing:.08em;color:var(--blue);text-transform:uppercase;margin-bottom:6px}
+h1{margin:0;font-size:34px;letter-spacing:-.02em}
+.lead{margin:8px 0 0;font-size:18px;color:#4b5a74;line-height:1.55}
+.badge{
+  padding:9px 12px;border-radius:999px;background:#eef3ff;color:#334ea0;border:1px solid #d7e0ff;
+  font-size:13px;font-weight:800;white-space:nowrap
+}
+.section-title{font-size:19px;font-weight:800;margin:0 0 10px}
+.card{background:#fbfcfe;border:1px solid var(--line);border-radius:18px;padding:18px}
+.small{font-size:13px;color:var(--muted);line-height:1.5}
+.pill{display:inline-block;padding:5px 9px;border-radius:999px;background:#eef3fb;border:1px solid #d7e1f1;color:#38507f;font-size:12px;margin:3px}
+.bottom{
+  margin-top:22px;padding:17px 20px;border-radius:18px;background:#eef4ff;border:1px solid #cfdbf7;
+  font-size:19px;font-weight:800;line-height:1.55;text-align:center
+}
+.code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:rgba(23,32,51,.06);padding:2px 6px;border-radius:6px;font-size:12px}
+table{width:100%;border-collapse:collapse;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+th,td{padding:12px 14px;border-bottom:1px solid #e7edf5;text-align:left;vertical-align:top;font-size:14px;line-height:1.45}
+th{background:#f7f9fc}
+tr:last-child td{border-bottom:none}
+@media(max-width:1100px){.grid3,.grid5,.topgrid,.bottomgrid{grid-template-columns:1fr!important}}
+
+.hero{display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:16px;margin-bottom:22px}
+.core{background:#172033;color:white;border-radius:20px;padding:24px;display:flex;flex-direction:column;justify-content:center;text-align:center;min-height:255px}
+.core .big{font-size:34px;font-weight:900;margin-bottom:10px}
+.core .quote{font-size:18px;line-height:1.6;color:#dbe3ef}
+.flow{display:flex;flex-direction:column;gap:8px}
+.step{background:white;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:14px}
+.arrow{text-align:center;color:#7d899e;font-weight:800}
+.danger{background:var(--danger-bg);border-color:var(--danger-line)}
+.good{background:var(--good-bg);border-color:var(--good-line)}
+.grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:22px}
+.axis{min-height:126px}
+.axis b{display:block;font-size:16px;margin-bottom:6px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.tech{min-height:165px}
+.tech .name{font-size:18px;font-weight:900;margin-bottom:4px}
+.tech .os{font-size:12px;color:#7a8798;margin-bottom:10px}
+.tech .essence{font-size:15px;font-weight:800;margin-bottom:6px}
 </style>
 </head>
 <body>
-  <main class="page">
-    <h1>AI Sandbox ― 5分でわかる図解</h1>
-    <p class="lead">AIを信用しきらなくても使えるように、<b>「暴走してもここまで」</b>という境界を先に作る。</p>
-
-    <section class="hero">
-      <div class="panel danger">
-        <h2>Sandboxなし</h2>
-        <div class="flow">
-          <div class="step">AI Agent がコードを読む</div>
-          <div class="arrow">↓</div>
-          <div class="step">Shell / Git / Browser / Network を実行</div>
-          <div class="arrow">↓</div>
-          <div class="step">誤操作・Prompt Injection</div>
-          <div class="arrow">↓</div>
-          <div class="step">Host / ~/.ssh / ~/.aws / 社内NW まで被害が波及</div>
-        </div>
-      </div>
-
-      <div class="core">
-        <div class="big">AI Sandbox</div>
-        <div class="quote">
-          AI専用の「安全な作業部屋」<br/>
-          部屋の中では自由に動かす。<br/>
-          でも、外には勝手に出さない。
-        </div>
-        <div class="tag">Blast Radius を小さくする</div>
-      </div>
-
-      <div class="panel safe">
-        <h2>Sandboxあり</h2>
-        <ul>
-          <li><b>Workspace内</b>は読み書きOK</li>
-          <li><b>Host側の秘密情報</b>は触らせない</li>
-          <li><b>Network</b>は必要先だけ許可</li>
-          <li><b>危険なOS操作</b>はKernel側で拒否</li>
-          <li><b>壊れたら環境ごと捨てる</b></li>
-        </ul>
-        <p class="muted">AIへのお願いではなく、OS / Container / VM 側で強制するのが重要。</p>
-      </div>
-    </section>
-
-    <div class="section-title">Sandboxで制御する5つの軸</div>
-    <section class="axes">
-      <div class="mini"><b>1. Filesystem</b><span>どのファイルを読める・書けるか。<br/>例：<span class="code">/workspace</span>のみRW。</span></div>
-      <div class="mini"><b>2. Network</b><span>どこへ通信できるか。<br/>外部送信や社内NW到達を制限。</span></div>
-      <div class="mini"><b>3. Permission</b><span>どのOS機能・コマンドを使えるか。</span></div>
-      <div class="mini"><b>4. Credential</b><span>AWS / GitHub / SSHなどの秘密情報をどう隔離するか。</span></div>
-      <div class="mini"><b>5. Lifetime</b><span>環境を使い捨てにし、壊れても作り直せるか。</span></div>
-    </section>
-
-    <div class="section-title">OSレベルの代表的な仕組み</div>
-    <section class="tech">
-      <div class="card">
-        <div class="name">Seatbelt</div>
-        <div class="os">macOS</div>
-        <div class="essence">プロセス全体をSandbox化</div>
-        <div class="desc">ファイル・ネットワークなどのアクセスをポリシーで制限。macOS版Codex / Claude Codeなどで使われる。</div>
-      </div>
-      <div class="card">
-        <div class="name">seccomp</div>
-        <div class="os">Linux</div>
-        <div class="essence">「何をしてよいか」を制限</div>
-        <div class="desc"><span class="code">mount()</span> や <span class="code">ptrace()</span> など、危険なSystem CallをKernel側で拒否する。</div>
-      </div>
-      <div class="card">
-        <div class="name">Landlock</div>
-        <div class="os">Linux</div>
-        <div class="essence">「どこにしてよいか」を制限</div>
-        <div class="desc"><span class="code">/workspace</span> はOK、<span class="code">~/.ssh</span> はNGなど、Filesystemへのアクセス範囲を限定する。</div>
-      </div>
-    </section>
-
-    <div class="section-title">Coding Agentの例</div>
-    <section class="products">
-      <div class="product">
-        <div class="title">Codex</div>
-        <div class="one">Sandbox内はある程度自由に動かし、<b>境界を越える操作だけ承認</b>させる考え方。</div>
-      </div>
-      <div class="product">
-        <div class="title">Claude Code</div>
-        <div class="one">毎回確認するより、<b>安全な範囲を先に決めて、その中では自由に動かす</b>方向。</div>
-      </div>
-      <div class="product">
-        <div class="title">GitHub Copilot Coding Agent</div>
-        <div class="one">クラウドの<b>一時的な実行環境</b>で実装・テストし、PRを作成。作業後は環境を破棄。</div>
-      </div>
-    </section>
-
-    <div class="bottom">
-      AI Sandbox = 「AIが正しいことを期待する」のではなく、<br/>
-      「間違っても、ここまでしか壊せない」を環境側で保証する仕組み
+<main class="page">
+  <div class="header">
+    <div>
+      <div class="eyebrow">AI Sandbox / 01</div>
+      <h1>AI Sandboxとは何か</h1>
+      <p class="lead">AI専用の「安全な作業部屋」。<b>AIを信用するのではなく、失敗しても被害が広がらない境界を作る。</b></p>
     </div>
-  </main>
+    <div class="badge">5分説明用</div>
+  </div>
+
+  <section class="hero">
+    <div class="card danger">
+      <div class="section-title">Sandboxなし</div>
+      <div class="flow">
+        <div class="step">AIがコードを読む</div><div class="arrow">↓</div>
+        <div class="step">Shell / Git / Browser / Networkを実行</div><div class="arrow">↓</div>
+        <div class="step">誤操作・Prompt Injection</div><div class="arrow">↓</div>
+        <div class="step">Host / ~/.ssh / ~/.aws / 社内NWへ波及</div>
+      </div>
+    </div>
+
+    <div class="core">
+      <div class="big">AI Sandbox</div>
+      <div class="quote">部屋の中では自由に働かせる。<br>でも、外には勝手に出さない。</div>
+      <div style="margin-top:16px"><span class="pill">Blast Radiusを小さくする</span></div>
+    </div>
+
+    <div class="card good">
+      <div class="section-title">Sandboxあり</div>
+      <div class="flow">
+        <div class="step"><b>Workspace</b>だけ読み書きOK</div>
+        <div class="step"><b>秘密情報</b>は触らせない</div>
+        <div class="step"><b>Network</b>は必要先だけ許可</div>
+        <div class="step"><b>危険なOS操作</b>はKernel側で拒否</div>
+        <div class="step"><b>壊れたら環境ごと破棄</b></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-title">Sandboxで制御する5つの軸</div>
+  <section class="grid5">
+    <div class="card axis"><b>1. Filesystem</b><div class="small">どのファイルを読める・書けるか。<br><span class="code">/workspace</span>のみRWなど。</div></div>
+    <div class="card axis"><b>2. Network</b><div class="small">どこへ通信できるか。外部送信・社内NW到達を制限。</div></div>
+    <div class="card axis"><b>3. Permission</b><div class="small">どのOS機能・コマンドを使えるか。</div></div>
+    <div class="card axis"><b>4. Credential</b><div class="small">AWS / GitHub / SSHなどの秘密情報をどう隔離するか。</div></div>
+    <div class="card axis"><b>5. Lifetime</b><div class="small">環境を使い捨てにし、壊れても作り直せるか。</div></div>
+  </section>
+
+  <div class="section-title">OSレベルではどう守る？</div>
+  <section class="grid3">
+    <div class="card tech">
+      <div class="name">Seatbelt</div><div class="os">macOS</div>
+      <div class="essence">プロセス全体をSandbox化</div>
+      <div class="small">ファイル・ネットワークなどのアクセスをポリシーで制限する。</div>
+    </div>
+    <div class="card tech">
+      <div class="name">seccomp</div><div class="os">Linux</div>
+      <div class="essence">「何をしてよいか」を制限</div>
+      <div class="small"><span class="code">mount()</span> や <span class="code">ptrace()</span> など危険なSystem Callを拒否。</div>
+    </div>
+    <div class="card tech">
+      <div class="name">Landlock</div><div class="os">Linux</div>
+      <div class="essence">「どこにしてよいか」を制限</div>
+      <div class="small"><span class="code">/workspace</span>はOK、<span class="code">~/.ssh</span>はNGなどFilesystem範囲を限定。</div>
+    </div>
+  </section>
+
+  <div class="bottom">AI Sandbox = 「AIが正しいことを期待する」のではなく、<br>「間違っても、ここまでしか壊せない」を環境側で保証する仕組み</div>
+</main>
 </body>
 </html>
