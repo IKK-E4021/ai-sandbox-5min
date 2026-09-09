@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dev Container × GitHub Copilot CLI 実例</title>
+<style>
+*{box-sizing:border-box}
+:root{
+  --bg:#f4f7fb;--panel:#fff;--ink:#172033;--muted:#5d6a80;--line:#dde5ef;
+  --blue:#4263eb;--teal:#0f8b8d;--purple:#6f4ad8;
+  --danger-bg:#fff5f2;--danger-line:#f0d8cf;--good-bg:#f3fbf5;--good-line:#cfe7d4;
+}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Kaku Gothic ProN","Yu Gothic","Noto Sans JP",sans-serif;
+}
+.page{
+  width:min(1480px,96vw);margin:24px auto;background:var(--panel);border-radius:24px;
+  box-shadow:0 12px 42px rgba(20,35,70,.10);padding:28px 32px 30px;
+}
+.header{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:22px}
+.eyebrow{font-size:12px;font-weight:800;letter-spacing:.08em;color:var(--blue);text-transform:uppercase;margin-bottom:6px}
+h1{margin:0;font-size:34px;letter-spacing:-.02em}
+.lead{margin:8px 0 0;font-size:18px;color:#4b5a74;line-height:1.55}
+.badge{
+  padding:9px 12px;border-radius:999px;background:#eef3ff;color:#334ea0;border:1px solid #d7e0ff;
+  font-size:13px;font-weight:800;white-space:nowrap
+}
+.section-title{font-size:19px;font-weight:800;margin:0 0 10px}
+.small{font-size:13px;color:var(--muted);line-height:1.5}
+.card{background:#fbfcfe;border:1px solid var(--line);border-radius:18px;padding:18px}
+.code{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  background:#121a2b;color:#eaf0fb;border-radius:14px;padding:15px 16px;
+  white-space:pre-wrap;font-size:12px;line-height:1.5;margin:0
+}
+.inline{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  background:rgba(23,32,51,.06);padding:2px 6px;border-radius:6px;font-size:12px
+}
+.pill{
+  display:inline-block;padding:5px 9px;border-radius:999px;background:#eef3fb;
+  border:1px solid #d7e1f1;color:#38507f;font-size:12px;margin:3px
+}
+.topgrid{display:grid;grid-template-columns:1.35fr .9fr;gap:16px;margin-bottom:22px}
+.arch{background:#f7f9fc;border:1px solid #e5ebf4;border-radius:20px;padding:18px;min-height:415px}
+.host{border:1px solid #ccd6e4;border-radius:18px;background:white;padding:16px;min-height:375px}
+.host-title{font-weight:900;font-size:17px;margin-bottom:5px}
+.docker{margin-top:12px;border:1px solid #c6d3e5;border-radius:16px;background:#f7f9fc;padding:14px}
+.container{
+  margin:12px 0 0 20px;border:2px solid #63abad;border-radius:16px;background:#eefbfb;padding:14px
+}
+.container-title{font-size:18px;font-weight:900;margin-bottom:4px;color:#11676a}
+.workspace{margin-top:10px;border:1px dashed #7dbbbc;background:white;border-radius:12px;padding:12px}
+.sandbox{
+  margin-top:10px;border:1px solid #cbbef6;background:#f5f1ff;border-radius:12px;padding:12px
+}
+.forbidden{margin-top:10px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.no{
+  background:#fff5f2;border:1px solid #f0d8cf;border-radius:11px;padding:9px;text-align:center;
+  font-size:12px;color:#74493d;font-weight:700
+}
+.rightcol{display:flex;flex-direction:column;gap:14px}
+.ok{background:var(--good-bg);border:1px solid var(--good-line);border-radius:14px;padding:12px 14px}
+.warn{background:var(--danger-bg);border:1px solid var(--danger-line);border-radius:14px;padding:12px 14px}
+.ok b,.warn b{display:block;margin-bottom:4px}
+.flow{
+  display:grid;grid-template-columns:1fr 32px 1fr 32px 1fr 32px 1fr;gap:8px;align-items:center;margin-bottom:22px
+}
+.step{
+  min-height:118px;border:1px solid var(--line);border-radius:16px;background:white;padding:13px;
+  display:flex;flex-direction:column;justify-content:center
+}
+.step .n{
+  width:25px;height:25px;border-radius:50%;background:#172033;color:white;font-size:12px;font-weight:900;
+  display:flex;align-items:center;justify-content:center;margin-bottom:7px
+}
+.step b{font-size:14px;margin-bottom:5px}
+.step span{font-size:12px;line-height:1.4;color:var(--muted)}
+.arr{text-align:center;font-size:20px;color:#8290a6;font-weight:900}
+.bottomgrid{display:grid;grid-template-columns:1fr 1.1fr;gap:16px}
+.guardgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:12px}
+.guard{border:1px solid var(--line);border-radius:13px;background:white;padding:11px;text-align:center;min-height:94px}
+.guard b{display:block;font-size:13px;margin-bottom:5px}
+.guard span{font-size:11.5px;color:var(--muted);line-height:1.35}
+.callout{
+  margin-top:22px;padding:17px 20px;border-radius:18px;background:#eef4ff;border:1px solid #cfdbf7;
+  font-size:19px;font-weight:800;line-height:1.55;text-align:center
+}
+.refs{margin-top:16px;font-size:11px;color:#758299;line-height:1.5}
+.refs a{color:#5e6f91}
+@media(max-width:1100px){
+  .topgrid,.bottomgrid{grid-template-columns:1fr}
+  .flow{grid-template-columns:1fr}
+  .arr{transform:rotate(90deg)}
+  .guardgrid,.forbidden{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<main class="page">
+  <div class="header">
+    <div>
+      <div class="eyebrow">AI Sandbox / 03</div>
+      <h1>Dev Container × GitHub Copilot CLI ― 実際にどう使う？</h1>
+      <p class="lead"><b>Copilot CLIそのものをDev Container内に入れて実行。</b>さらにCopilot CLIのLocal Sandboxも有効化し、二重に境界を作る。</p>
+    </div>
+    <div class="badge">CLI実践例</div>
+  </div>
+
+  <section class="topgrid">
+    <div class="arch">
+      <div class="host">
+        <div class="host-title">Host PC</div>
+        <div class="small">Dockerだけを動かす。Copilot CLIはHostではなくContainer内で実行する。</div>
+
+        <div class="docker">
+          <b>Docker / Dev Container</b>
+          <div class="container">
+            <div class="container-title">Dev Container = 第1の境界</div>
+            <div class="small">JDK / Gradle / Git / GitHub Copilot CLIをContainer内へ固定</div>
+
+            <div class="workspace">
+              <b>/workspaces/my-app</b>
+              <div class="small">RepositoryはContainer Volume側にclone。ここで <span class="inline">copilot</span> を起動。</div>
+              <div style="margin-top:7px">
+                <span class="pill">copilot</span>
+                <span class="pill">./gradlew test</span>
+                <span class="pill">git diff</span>
+                <span class="pill">gh / git</span>
+              </div>
+            </div>
+
+            <div class="sandbox">
+              <b>Copilot CLI Local Sandbox = 第2の境界</b>
+              <div class="small">
+                <span class="inline">/sandbox enable</span> で、Copilotが呼び出すShell・File tool等をOS Sandbox内へ。
+                CWDは書込可、Home/Systemは原則Read-only、その他はBlockという既定ポリシー。
+              </div>
+            </div>
+          </div>
+
+          <div class="forbidden">
+            <div class="no">Host ~/.aws<br>mountしない</div>
+            <div class="no">Host ~/.ssh<br>mountしない</div>
+            <div class="no">Docker socket<br>mountしない</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rightcol">
+      <div class="card">
+        <div class="section-title">この構成の狙い</div>
+        <div class="ok">
+          <b>① Copilot CLI自体をContainerに入れる</b>
+          AgentのShell実行・ファイル変更はまずContainer内に閉じる。Hostのユーザー環境と直接共有しない。
+        </div>
+        <div class="ok" style="margin-top:9px">
+          <b>② その中でCopilot CLI SandboxもON</b>
+          Dev Containerだけに頼らず、Copilotが実行するコマンドをさらにOS Sandboxで制限する。
+        </div>
+        <div class="ok" style="margin-top:9px">
+          <b>③ RepositoryもHostと分離</b>
+          Hostの作業ツリーをRW bind mountせず、Container Volumeへclone。壊れたらVolumeごと捨てられる。
+        </div>
+      </div>
+
+      <div class="warn">
+        <b>GitHub Copilot CLI Local Sandboxの既定値には注意</b>
+        現在はLocal/Private NetworkとOutbound Internetが既定で許可され、Git / <span class="inline">gh</span> の認証情報も既定でSandboxへ提供される。必要に応じて <span class="inline">/sandbox config</span> で絞る。
+      </div>
+    </div>
+  </section>
+
+  <div class="section-title">実際の使い方</div>
+  <section class="flow">
+    <div class="step">
+      <div class="n">1</div><b>Containerを起動</b>
+      <span>RepositoryをContainer Volumeへclone。Hostの秘密情報はmountしない。</span>
+    </div>
+    <div class="arr">→</div>
+    <div class="step">
+      <div class="n">2</div><b>Copilot CLIを起動</b>
+      <span><span class="inline">cd /workspaces/my-app</span><br><span class="inline">copilot --experimental</span></span>
+    </div>
+    <div class="arr">→</div>
+    <div class="step">
+      <div class="n">3</div><b>SandboxをON</b>
+      <span><span class="inline">/sandbox enable</span><br><span class="inline">/sandbox policy</span> で境界を確認。</span>
+    </div>
+    <div class="arr">→</div>
+    <div class="step">
+      <div class="n">4</div><b>Agentに実装させる</b>
+      <span>「このAPIにvalidationを追加してUTまで実行して」→ 編集・Gradle実行・再試行。</span>
+    </div>
+  </section>
+
+  <section class="bottomgrid">
+    <div class="card">
+      <div class="section-title">Terminalのイメージ</div>
+      <pre class="code"># Dev Container内
+$ cd /workspaces/my-app
+
+# Copilot CLI 起動
+$ copilot --experimental
+
+> /sandbox enable
+Sandbox enabled.
+
+> /sandbox policy
+Filesystem:
+  /workspaces/my-app   writable
+  $HOME                read-only
+  other locations      blocked
+
+> このAPIにvalidationを追加して、
+  ./gradlew test まで実行して
+
+Copilot:
+  - コードを検索
+  - ファイルを修正
+  - ./gradlew test
+  - 失敗箇所を修正
+  - 再テスト</pre>
+    </div>
+
+    <div class="card">
+      <div class="section-title">安全寄りにするなら追加でここを絞る</div>
+      <div class="guardgrid">
+        <div class="guard"><b>Filesystem</b><span>RepoはVolume。Host directoryのRW mountを避ける。</span></div>
+        <div class="guard"><b>Network</b><span>Local networkや不要なInternet到達を無効化/Allowlist化。</span></div>
+        <div class="guard"><b>Permission</b><span>non-root、privileged禁止、Docker socketを渡さない。</span></div>
+        <div class="guard"><b>Credential</b><span>Git / gh認証注入も必要性を判断。AWS本番鍵は渡さない。</span></div>
+        <div class="guard"><b>Lifetime</b><span>壊れたらContainer / Volumeを破棄して作り直す。</span></div>
+      </div>
+
+      <div class="warn" style="margin-top:14px">
+        <b>「二重Sandboxだから絶対安全」ではない</b>
+        Dev ContainerもCopilot CLI Sandboxも設定が重要。特に <span class="inline">privileged</span>、Docker socket、
+        過剰なbind mount、Credential注入、広いNetwork許可は境界を弱くする。
+      </div>
+
+      <div class="ok" style="margin-top:10px">
+        <b>実運用のイメージ</b>
+        「AgentにはWorkspace内ではかなり自由に実装・テストさせる。一方で、Host・本番Credential・不要なNetworkには到達させない。」
+      </div>
+    </div>
+  </section>
+
+  <div class="callout">
+    Dev Container × Copilot CLI = <b>ContainerでHostから隔離</b> ＋ <b>Copilot Local SandboxでAgentの操作をさらに制限</b>
+  </div>
+
+  <div class="refs">
+    公式仕様メモ：
+    <a href="https://docs.github.com/en/copilot/how-tos/cloud-and-local-sandboxes/using-local-sandboxing">GitHub Docs - Using local sandboxing</a> /
+    <a href="https://docs.github.com/en/copilot/how-tos/cloud-and-local-sandboxes/configuring-local-sandbox-settings">Configuring local sandbox settings</a> /
+    <a href="https://docs.github.com/en/copilot/how-tos/copilot-cli/use-copilot-cli/overview">Using GitHub Copilot CLI</a><br>
+    ※ 2026-09時点。Copilot CLI Local SandboxはPublic Preview / experimental扱いのため仕様変更の可能性あり。
+  </div>
+</main>
+</body>
+</html>

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>AI Sandboxの実装パターン比較</title>
+<style>
+
+*{box-sizing:border-box}
+:root{
+  --bg:#f4f7fb;--panel:#fff;--ink:#172033;--muted:#5d6a80;--line:#dde5ef;
+  --blue:#4263eb;--teal:#0f8b8d;--purple:#6f4ad8;--soft:#f8fafc;
+  --danger-bg:#fff5f2;--danger-line:#f0d8cf;--good-bg:#f3fbf5;--good-line:#cfe7d4;
+}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Kaku Gothic ProN","Yu Gothic","Noto Sans JP",sans-serif;
+}
+.page{
+  width:min(1480px,96vw);margin:24px auto;background:var(--panel);border-radius:24px;
+  box-shadow:0 12px 42px rgba(20,35,70,.10);padding:28px 32px 30px;
+}
+.header{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:22px}
+.eyebrow{font-size:12px;font-weight:800;letter-spacing:.08em;color:var(--blue);text-transform:uppercase;margin-bottom:6px}
+h1{margin:0;font-size:34px;letter-spacing:-.02em}
+.lead{margin:8px 0 0;font-size:18px;color:#4b5a74;line-height:1.55}
+.badge{
+  padding:9px 12px;border-radius:999px;background:#eef3ff;color:#334ea0;border:1px solid #d7e0ff;
+  font-size:13px;font-weight:800;white-space:nowrap
+}
+.section-title{font-size:19px;font-weight:800;margin:0 0 10px}
+.card{background:#fbfcfe;border:1px solid var(--line);border-radius:18px;padding:18px}
+.small{font-size:13px;color:var(--muted);line-height:1.5}
+.pill{display:inline-block;padding:5px 9px;border-radius:999px;background:#eef3fb;border:1px solid #d7e1f1;color:#38507f;font-size:12px;margin:3px}
+.bottom{
+  margin-top:22px;padding:17px 20px;border-radius:18px;background:#eef4ff;border:1px solid #cfdbf7;
+  font-size:19px;font-weight:800;line-height:1.55;text-align:center
+}
+.code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:rgba(23,32,51,.06);padding:2px 6px;border-radius:6px;font-size:12px}
+table{width:100%;border-collapse:collapse;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+th,td{padding:12px 14px;border-bottom:1px solid #e7edf5;text-align:left;vertical-align:top;font-size:14px;line-height:1.45}
+th{background:#f7f9fc}
+tr:last-child td{border-bottom:none}
+@media(max-width:1100px){.grid3,.grid5,.topgrid,.bottomgrid{grid-template-columns:1fr!important}}
+
+.topgrid{display:grid;grid-template-columns:1.1fr 1fr;gap:16px;margin-bottom:22px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:22px}
+.col{border:1px solid var(--line);border-radius:20px;overflow:hidden;background:#fff}
+.head{padding:18px;color:white}
+.head.local{background:linear-gradient(135deg,#3955c6,#4a72ea)}
+.head.container{background:linear-gradient(135deg,#0f8b8d,#22a6a8)}
+.head.cloud{background:linear-gradient(135deg,#5b3cc4,#7c58ef)}
+.head .title{font-size:24px;font-weight:900;margin-bottom:4px}
+.head .sub{font-size:14px;opacity:.95}
+.content{padding:18px}
+.diagram{min-height:250px;background:#f7f9fc;border:1px solid #e5ebf4;border-radius:16px;padding:14px;margin-bottom:14px}
+.box{border:1px solid #cfd8e6;border-radius:14px;background:white;padding:12px;margin-bottom:10px}
+.inner{margin:10px 0 10px 18px;background:#eef4ff}
+.dev{margin:10px 0 10px 18px;background:#eefbfb;border:2px dashed #6db7b8}
+.cloudbox{background:#f4f0ff;border-color:#d4cbfb}
+.arrow{text-align:center;color:#7d899e;font-weight:800;margin:4px 0}
+.warn{background:var(--danger-bg);border:1px solid var(--danger-line);border-radius:14px;padding:10px 12px;font-size:13px;color:#734638}
+.ok{background:var(--good-bg);border:1px solid var(--good-line);border-radius:14px;padding:10px 12px;font-size:13px;color:#2f5d40}
+.bottomgrid{display:grid;grid-template-columns:1.15fr 1fr;gap:16px}
+.formula{background:#172033;color:white;border-radius:18px;padding:18px 20px}
+.formula .big{font-size:21px;font-weight:900;margin-bottom:8px}
+.formula .eq{font-size:20px;font-weight:800;line-height:1.55}
+</style>
+</head>
+<body>
+<main class="page">
+  <div class="header">
+    <div>
+      <div class="eyebrow">AI Sandbox / 02</div>
+      <h1>AI Sandboxの実装パターン比較</h1>
+      <p class="lead">同じSandboxでも実装はさまざま。<b>Local OS Sandbox / Dev Container / Cloud Sandbox</b> の3パターンで見る。</p>
+    </div>
+    <div class="badge">5分説明用</div>
+  </div>
+
+  <section class="topgrid">
+    <div class="card">
+      <div class="section-title">まず押さえること</div>
+      <div class="small">Sandboxの本質は<b>Containerかどうか</b>ではない。Filesystem / Network / Permission / Credential / Lifetime をどう制御し、Blast Radiusを小さくできるかが重要。</div>
+    </div>
+    <div class="card">
+      <div class="section-title">ざっくり使い分け</div>
+      <div class="small"><b>Local</b>：軽く速い　／　<b>Dev Container</b>：再現性が高い　／　<b>Cloud</b>：Hostから切り離しやすい</div>
+    </div>
+  </section>
+
+  <section class="grid3">
+    <article class="col">
+      <div class="head local"><div class="title">Local OS Sandbox</div><div class="sub">Codex / Claude Code のローカル実行など</div></div>
+      <div class="content">
+        <div class="diagram">
+          <div class="box"><b>Mac / Linux Host</b><div class="small">自分のPC上でAgentを動かす</div>
+            <div class="box inner"><b>OS Sandbox</b><div class="small">Seatbelt / seccomp / Landlock など</div>
+              <div><span class="pill">/workspace RW</span><span class="pill">~/.ssh NG</span><span class="pill">Network制限</span></div>
+            </div>
+            <div class="small">Hostには秘密情報や社内NWが存在 → Sandbox境界で触れないようにする</div>
+          </div>
+        </div>
+        <div class="ok"><b>強み：</b>起動が速く、対話的な開発と相性がよい</div>
+      </div>
+    </article>
+
+    <article class="col">
+      <div class="head container"><div class="title">Dev Container</div><div class="sub">VS Code Dev Container / Dockerベース</div></div>
+      <div class="content">
+        <div class="diagram">
+          <div class="box"><b>Host PC</b><div class="small">Dockerを動かす土台</div>
+            <div class="box dev"><b>Dev Container</b><div class="small">ランタイム・ツール・Agentを内包</div>
+              <div><span class="pill">Java / Node</span><span class="pill">AI Agent</span><span class="pill">再現性</span></div>
+            </div>
+            <div class="arrow">↓</div>
+            <div class="small"><b>bind mountがRWなら</b>、Container内の削除・変更がHostにも反映される</div>
+          </div>
+        </div>
+        <div class="warn"><b>注意：</b>Dev Container ≠ 自動的に安全なAI Sandbox</div>
+      </div>
+    </article>
+
+    <article class="col">
+      <div class="head cloud"><div class="title">Cloud Sandbox</div><div class="sub">Copilot Coding Agent / Codex Cloud など</div></div>
+      <div class="content">
+        <div class="diagram">
+          <div class="box cloudbox"><b>Ephemeral Sandbox</b><div class="small">クラウド上の一時的な隔離環境</div>
+            <div><span class="pill">Repo clone</span><span class="pill">Build/Test</span><span class="pill">PR</span><span class="pill">破棄</span></div>
+          </div>
+          <div class="arrow">↓</div>
+          <div class="box"><b>出力</b><div class="small">変更をCommit / PR化して人間がレビュー</div></div>
+        </div>
+        <div class="ok"><b>強み：</b>Host PCから切り離しやすく、使い捨て前提と相性がよい</div>
+      </div>
+    </article>
+  </section>
+
+  <div class="section-title">3パターンの比較</div>
+  <table>
+    <thead><tr><th>観点</th><th>Local OS Sandbox</th><th>Dev Container</th><th>Cloud Sandbox</th></tr></thead>
+    <tbody>
+      <tr><td><b>隔離の単位</b></td><td>プロセス</td><td>Container</td><td>VM / Container / isolated env</td></tr>
+      <tr><td><b>Hostからの距離</b></td><td>近い</td><td>中間</td><td>遠い</td></tr>
+      <tr><td><b>再現性</b></td><td>やや環境依存</td><td>高い</td><td>高い</td></tr>
+      <tr><td><b>使い捨て</b></td><td>中</td><td>中〜高</td><td>高い</td></tr>
+      <tr><td><b>主な落とし穴</b></td><td>権限 / Network設定</td><td>bind mount / secret / Network</td><td>Credential / Firewall設計</td></tr>
+    </tbody>
+  </table>
+
+  <section class="bottomgrid" style="margin-top:22px">
+    <div class="card">
+      <div class="section-title">一番伝えたいこと</div>
+      <div style="font-size:16px;line-height:1.6"><b>Containerを使っただけでは不十分。</b><br>何を見せるか・何を実行させるか・どこへ通信させるか・秘密情報をどう隔離するかを設計する。</div>
+    </div>
+    <div class="formula">
+      <div class="big">強いSandboxの式</div>
+      <div class="eq">Dev Container<br>＋ Filesystem制限<br>＋ Network制限<br>＋ Credential隔離<br>＋ 使い捨て運用</div>
+    </div>
+  </section>
+</main>
+</body>
+</html>
